@@ -89,6 +89,8 @@ def createPrimvarShader(parentPath, stage):
     return result
 
 def createTextureShader(parentPath, imgFile, diffuseColor, uv, stage):
+    # we need to do some introspection on the imgFile, since it might
+    # be only greyscale (especially for a scan)
     sPath = os.path.join(parentPath, "Texture")
     sSchema = UsdShade.Shader.Define(stage, sPath)
     # is this predefined as a token somewhere? Too fragile...
@@ -166,6 +168,7 @@ def main(argv):
     print "making USD file", fileName
     with Image.open(args.imgFile) as i:
         (pixelsWide, pixelsHigh) = i.size
+        print "image: ", i
         print "image is ", pixelsWide, " x ", pixelsHigh
         aspectRatio = float(pixelsWide)/float(pixelsHigh)
         height = float(args.height)
