@@ -46,10 +46,11 @@ def makeCard(topLevelName, imgFile, width, height, upAxis, stage):
     material = makeMaterial(cardPath, imgFile, stage)
     # we should replace the following single call with calls to
     # make 3 meshes
+    frameW = 1
     makeMesh(cardPath, width, height, upAxis, material, stage)
     makeMatte(cardPath, height, width, upAxis, material, stage)
-    makeFrame(cardPath, height, width, upAxis, material, stage)
-
+    makeFrame(cardPath, height, width, upAxis, frameW, material, stage)
+    makeBackSq(cardPath, height, width, upAxis, frameW, material, stage)
 
 def makeMaterial(parentPath, imgFile, stage):
     mPath = os.path.join(parentPath, "Material")
@@ -187,7 +188,7 @@ def makeMatte(parentPath, imgHeight, imgWidth, upAxis, material, stage):
     meshSchema.CreateExtentAttr().Set(extent)
     meshSchema.GetDisplayColorAttr().Set( [(1, 1, 1)] )
 
-def makeFrame(parentPath, imgHeight, imgWidth, upAxis, material, stage):
+def makeFrame(parentPath, imgHeight, imgWidth, upAxis, frameW, material, stage):
     meshPath = os.path.join(parentPath, "Frame")
     meshSchema = UsdGeom.Mesh.Define(stage, meshPath)
     vertexCounts = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
@@ -216,25 +217,26 @@ def makeFrame(parentPath, imgHeight, imgWidth, upAxis, material, stage):
     inH = imgHeight + off1
     inHDiff = -off1
     off2 = -(off1 * 2)
-    frameW = 1
+
     outW = imgWidth /2 + frameW
     outH = imgHeight + frameW
     outHDiff = -frameW
+    addZ = 0.4
     
     # we want to put the origin of the card in the center 'bottom'
     # this is course depends on what the up axis is:
     
     if upAxis == 'y' or upAxis == 'Y':
         UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
-        points = [(-outW, outHDiff, -off1), #0
-                  (outW, outHDiff, -off1), #1
-                  (outW, outH, -off1),      #2
-                  (-outW, outH, -off1),     #3
+        points = [(-outW, outHDiff, -off1 + addZ), #0
+                  (outW, outHDiff, -off1 + addZ), #1
+                  (outW, outH, -off1 + addZ),      #2
+                  (-outW, outH, -off1 + addZ),     #3
 
-                  (-inW, inHDiff, -off1),   #4
-                  (inW, inHDiff, -off1),    #5
-                  (inW, inH, -off1),        #6
-                  (-inW, inH, -off1),       #7
+                  (-inW, inHDiff, -off1 + addZ),   #4
+                  (inW, inHDiff, -off1 + addZ),    #5
+                  (inW, inH, -off1 + addZ),        #6
+                  (-inW, inH, -off1 + addZ),       #7
 
                   (-outW, outHDiff, -off1 - off1), #8
                   (outW, outHDiff, -off1 - off1),  #9
@@ -274,6 +276,46 @@ def makeFrame(parentPath, imgHeight, imgWidth, upAxis, material, stage):
     extent = meshSchema.ComputeExtent(points)
     meshSchema.CreateExtentAttr().Set(extent)
     meshSchema.GetDisplayColorAttr().Set( [(1, 0, 0)] )
+
+def makeBackSq(parentPath, imgHeight, imgWidth, upAxis, frameW, material, stage):
+    meshPath = os.path.join(parentPath, "BackSq")
+    meshSchema = UsdGeom.Mesh.Define(stage, meshPath)
+    vertexCounts = [4]
+    meshSchema.CreateFaceVertexCountsAttr().Set(vertexCounts)
+    indices = [2, 3, 0, 1]
+    meshSchema.GetFaceVertexIndicesAttr().Set(indices)
+    meshSchema.GetSubdivisionSchemeAttr().Set("none")
+    # put comment here
+    offset = -0.6
+    sqSide = min(imgHeight, imgWidth)
+    # we want to put the origin of the card in the center 'bottom'
+    # this is course depends on what the up axis is:
+    if upAxis == 'y' or upAxis == 'Y':
+        UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
+        points = [(-sqSide /2, sqSide + frameW, offset),
+                  (sqSide /2, sqSide + frameW, offset),
+                  (sqSide/2, frameW, offset),
+                  (-sqSide /2, frameW, offset)]
+    if upAxis == 'z' or upAxis == 'Z':
+        UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
+        points = [(-sqSide /2, offset, sqSide,),
+                  (sqSide /2, offset, sqSide),
+                  (sqSide/2, offset, sqSide/2),
+                  (-sqSide /2, offset, sqSide/2)]
+    meshSchema.CreatePointsAttr().Set(points)
+    uvs = [(1, 1),
+           (0, 1),
+           (0, 0),
+           (1, 0)]
+    st = meshSchema.CreatePrimvar("st", Sdf.ValueTypeNames.Float2Array)
+    st.Set(uvs)
+    st.SetInterpolation(UsdGeom.Tokens.vertex)
+    extent = meshSchema.ComputeExtent(points)
+    meshSchema.CreateExtentAttr().Set(extent)
+    prim = meshSchema.GetPrim()
+    relName = "material:binding"
+    rel = prim.CreateRelationship(relName)
+    rel.AddTarget(material)
 
 def main(argv):
     parser = argparse.ArgumentParser()
