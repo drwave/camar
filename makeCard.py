@@ -35,7 +35,7 @@ from PIL import Image
     
     '''
 
-def makeCard(topLevelName, imgFile, width, height, upAxis, stage):
+def makeCard(topLevelName, imgFile, creditFile, width, height, upAxis, stage):
     cardPath = "/" + Tf.MakeValidIdentifier(topLevelName)
     cardSchema = UsdGeom.Xform.Define(stage, cardPath)
     prim = cardSchema.GetPrim()
@@ -44,16 +44,18 @@ def makeCard(topLevelName, imgFile, width, height, upAxis, stage):
     # I think we can add a "comment" which will show up
     prim.SetMetadata(Sdf.PrimSpec.KindKey, Kind.Tokens.component)
     material = makeMaterial(cardPath, imgFile, stage)
+    materialBackSq = makeMaterial(cardPath, creditFile, stage)
     # we should replace the following single call with calls to
     # make 3 meshes
     frameW = 1
     makeMesh(cardPath, width, height, upAxis, material, stage)
     makeMatte(cardPath, height, width, upAxis, material, stage)
     makeFrame(cardPath, height, width, upAxis, frameW, material, stage)
-    makeBackSq(cardPath, height, width, upAxis, frameW, material, stage)
+    makeBackSq(cardPath, height, width, upAxis, frameW, materialBackSq, stage)
 
 def makeMaterial(parentPath, imgFile, stage):
-    mPath = os.path.join(parentPath, "Material")
+    newName = Tf.MakeValidIdentifier("Material_" + imgFile)
+    mPath = os.path.join(parentPath, newName)
     mSchema = UsdShade.Material.Define(stage, mPath)
     mSurface = mSchema.CreateOutput("surface", Sdf.ValueTypeNames.Token)
     diffuseColor = createPreviewSurfaceShader(mPath, mSurface, stage)
@@ -187,6 +189,7 @@ def makeMatte(parentPath, imgHeight, imgWidth, upAxis, material, stage):
     extent = meshSchema.ComputeExtent(points)
     meshSchema.CreateExtentAttr().Set(extent)
     meshSchema.GetDisplayColorAttr().Set( [(1, 1, 1)] )
+    meshSchema.CreateDoubleSidedAttr().Set(1)
 
 def makeFrame(parentPath, imgHeight, imgWidth, upAxis, frameW, material, stage):
     meshPath = os.path.join(parentPath, "Frame")
@@ -277,7 +280,7 @@ def makeFrame(parentPath, imgHeight, imgWidth, upAxis, frameW, material, stage):
     meshSchema.CreateExtentAttr().Set(extent)
     meshSchema.GetDisplayColorAttr().Set( [(1, 0, 0)] )
 
-def makeBackSq(parentPath, imgHeight, imgWidth, upAxis, frameW, material, stage):
+def makeBackSq(parentPath, imgHeight, imgWidth, upAxis, frameW, materialBackSq, stage):
     meshPath = os.path.join(parentPath, "BackSq")
     meshSchema = UsdGeom.Mesh.Define(stage, meshPath)
     vertexCounts = [4]
@@ -312,20 +315,23 @@ def makeBackSq(parentPath, imgHeight, imgWidth, upAxis, frameW, material, stage)
     st.SetInterpolation(UsdGeom.Tokens.vertex)
     extent = meshSchema.ComputeExtent(points)
     meshSchema.CreateExtentAttr().Set(extent)
+    meshSchema.GetDisplayColorAttr().Set( [(1, 1, 1)] )
     prim = meshSchema.GetPrim()
     relName = "material:binding"
     rel = prim.CreateRelationship(relName)
-    rel.AddTarget(material)
+    rel.AddTarget(materialBackSq)
 
 def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("imgFile",
                         help="image to turn into a USD card")
+    parser.add_argument("creditFile",
+                        help="image to turn into the back square credit card")
                         # we should make this default to Y
     parser.add_argument("upAxis",
-                                help="Y or Z")
+                    help="Y or Z")
     parser.add_argument("height",
-                        help="height of resulting card in base units (cm)")
+                    help="height of resulting card in base units (cm)")
     parser.add_argument("outputFileName",
                     help="USD file prefix that will be generated")
     args = parser.parse_args()
@@ -345,7 +351,7 @@ def main(argv):
         aspectRatio = float(pixelsWide)/float(pixelsHigh)
         height = float(args.height)
         width = height * aspectRatio
-        makeCard(prefix, args.imgFile, width, height, args.upAxis, outStage)
+        makeCard(prefix, args.imgFile, args.creditFile, width, height, args.upAxis, outStage)
         outStage.Save()
         exit(0)
     print "Unable to open image file ", args.imgFile
