@@ -51,6 +51,7 @@ def makeCard(topLevelName, imgFile, creditFile, width, height, upAxis, stage):
     makeMesh(cardPath, width, height, upAxis, material, stage)
     makeMatte(cardPath, height, width, upAxis, material, stage)
     makeFrame(cardPath, height, width, upAxis, frameW, material, stage)
+    
     makeBackSq(cardPath, height, width, upAxis, frameW, materialBackSq, stage)
 
 def makeMaterial(parentPath, imgFile, stage):
@@ -316,25 +317,45 @@ def makeBackSq(parentPath, imgHeight, imgWidth, upAxis, frameW, materialBackSq, 
     extent = meshSchema.ComputeExtent(points)
     meshSchema.CreateExtentAttr().Set(extent)
     meshSchema.GetDisplayColorAttr().Set( [(1, 1, 1)] )
-    prim = meshSchema.GetPrim()
-    relName = "material:binding"
-    rel = prim.CreateRelationship(relName)
-    rel.AddTarget(materialBackSq)
+    if materialBackSq != None:
+        prim = meshSchema.GetPrim()
+        relName = "material:binding"
+        rel = prim.CreateRelationship(relName)
+        rel.AddTarget(materialBackSq)
 
 def main(argv):
+
+    # set some reasonable defaults
+    creditFile = None
+    upAxis = "Y"
+    artHeight = 30.0
+    out = "card.usda"
+    
+    # setup our arguments - we need an input image, everything else is optional
     parser = argparse.ArgumentParser()
     parser.add_argument("imgFile",
                         help="image to turn into a USD card")
-    parser.add_argument("creditFile",
-                        help="image to turn into the back square credit card")
-                        # we should make this default to Y
-    parser.add_argument("upAxis",
-                    help="Y or Z")
-    parser.add_argument("height",
-                    help="height of resulting card in base units (cm)")
-    parser.add_argument("outputFileName",
-                    help="USD file prefix that will be generated")
+    parser.add_argument("-c", "--creditFile", help="image to turn into the back square credit card")
+    parser.add_argument("-u", "--upAxis",
+                        help="Y or Z",
+                        default=upAxis)
+    parser.add_argument("--height",
+                        help="height of resulting card in base units (cm)",
+                        default=artHeight)
+    parser.add_argument( "-o", "--out", "--outputFileName",
+                    help="prefix of USD file that will be generated (i.e. don't add the extension, we will)",
+                        default=out)
+                        
     args = parser.parse_args()
+    
+    if args.height != None:
+        artHeight = float(args.artHeight)
+    if args.upAxis != None:
+        upAxis = args.upAxis
+    if args.creditFile != None:
+        creditFile = args.creditFile
+    if args.outputFileName != None:
+        out = args.outputFileName
 
     # should check if there is already extension on this, and only add if not
     prefix = os.path.basename(args.outputFileName)
@@ -349,9 +370,8 @@ def main(argv):
         print "image: ", i
         print "image is ", pixelsWide, " x ", pixelsHigh
         aspectRatio = float(pixelsWide)/float(pixelsHigh)
-        height = float(args.height)
-        width = height * aspectRatio
-        makeCard(prefix, args.imgFile, args.creditFile, width, height, args.upAxis, outStage)
+        width = artHeight * aspectRatio
+        makeCard(prefix, args.imgFile, creditFile, width, artHeight, upAxis, outStage)
         outStage.Save()
         exit(0)
     print "Unable to open image file ", args.imgFile
