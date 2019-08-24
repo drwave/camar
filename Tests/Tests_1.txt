@@ -1,0 +1,56 @@
+#!/bin/sh
+
+ 
+echo “checking differences between standard WWBN_11 with WWBN_11 as credit file.”
+./makeCard.py ./img/WWBN_11.jpg
+./makeCard.py ./img/WWBN_11.jpg -c ./img/WWBN_11.jpg
+./makeCard.py ./img/WWBN_11.jpg -c ./img/WWBN_11.jpg -u Y
+./makeCard.py ./img/WWBN_11.jpg -c ./img/WWBN_11.jpg —-upAxis Y
+./makeCard.py ./img/WWBN_11.jpg —-creditFile ./img/WWBN_11.jpg -u Y
+./makeCard.py ./img/WWBN_11.jpg -u Y -o card
+
+echo "checking differences between WWBN_11 using Clowes1 as credit, all else standard."
+./makeCard.py ./img/WWBN_11.jpg -c ./img/Clowes1.jpg
+./makeCard.py ./img/WWBN_11.jpg —-creditFile ./img/Clowes1.jpg
+./makeCard.py ./img/WWBN_11.jpg -c ./img/Clowes1.jpg -u Y
+./makeCard.py ./img/WWBN_11.jpg —-creditFile ./img/Clowes1.jpg -u Y
+./makeCard.py ./img/WWBN_11.jpg -c ./img/Clowes1.jpg —-upAxis Y
+
+echo "checking builds of varying heights"
+./makeCard.py ./img/WWBN_11.jpg —-height 100
+./makeCard.py ./img/WWBN_11.jpg —-height 1
+./makeCard.py ./img/WWBN_11.jpg —-height 89
+./makeCard.py ./img/WWBN_11.jpg —-height 2052
+./makeCard.py ./img/WWBN_11.jpg -c ./img/WWBN_11 —-height 100 
+
+./makeCard.py ./img/WWBN_11.jpg -o makeCardTest
+./makeCard.py ./img/WWBN_11.jpg -—out makeCardTest
+./makeCard.py ./img/WWBN_11.jpg -u Y
+./makeCard.py ./img/WWBN_11.jpg -u Z
+./makeCard.py ./img/WWBN_11.jpg -u Z —-height 100
+./makeCard.py ./img/Clowes1.jpg —-creditFile ./img/WWBN_11.jpg —o makeCardTest
+./makeCard.py ./img/Clowes1.jpg —-creditFile ./img/WWBN_11.jpg —-out makeCardTest
+./makeCard.py ./img/Clowes1.jgg —-c ./img/WWBN_11.jpg —-out makeCardTest
+./makeCard.py ./img/Clowes1.jpg —-c ./img/WWBN_11.jpg —o makeCardTest
+./makeCard.py ./img/Clowes1.jgg —-c ./img/WWBN_11.jpg —o makeCardTest -u Y
+./makeCard.py ./img/Clowes1.jpg —-c ./img/WWBN_11.jpg —o makeCardTest -u Z
+./makeCard.py ./img/Clowes1.jpg —-c ./img/WWBN_11.jpg —o makeCardTest -u Z -height 100
+./makeCard.py ./img/Clowes1.jpg —-c ./img/WWBN_11.jpg —o makeCardTest -u Z -height 89
+./makeCard.py ./img/Clowes1.jpg —-c ./img/WWBN_11.jpg —o makeCardTest -u Z -height 432
+./makeCard.py ./img/Clowes1.jpg —-c ./img/WWBN_11.jpg —o makeCardTest -height 432 -u Z
+./makeCard.py ./img/Clowes1.jpgg —-c ./img/WWBN_11.jpg -height 432 -u Z —o makeCardTest 
+./makeCard.py ./img/Clowes1.jpgg —-c ./img/WWBN_11.jpg -u Z -height 432 —o makeCardTest 
+./makeCard.py ./img/Clowes1.jpgg -u Z -height 432 —o makeCardTest —-c ./img/WWBN_11.jpg
+./makeCard.py ./imgManThing_9.jpg -u Z -height 432 —o makeCardTest —-c ./img/WWBN_11.jpg
+./makeCard.py ./imgManThing_9.jpg
+./makeCard.py ./imgManThing_9.jpg -o makeCardOut
+./makeCard.py ./imgManThing_9.jpg —-out makeCardOut
+./makeCard.py ./imgManThing_9.jpg -o makeCardOut -c ./img/Clowes1.jpg 
+./makeCard.py ./imgManThing_9.jpg -o makeCardOut -u Y
+./makeCard.py ./imgManThing_9.jpg -o makeCardOut -u Z
+
+
+
+
+
+
