@@ -253,22 +253,25 @@ def makeFrame(parentPath, imgHeight, imgWidth, upAxis, frameW, material, stage):
                   (-inW, inH, -off1 - off1)]      #15
     if upAxis == 'z' or upAxis == 'Z':
         UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
-        points = [(-outW, -off2, outHDiff),
-                  (outW, -off2, outHDiff),
-                  (outW, -off2, outH),
-                  (-outW, -off2, outH),
-                  (-inW, -off2, inHDiff),
-                  (inW, -off2, inHDiff),
-                  (inW, -off2, inH),
-                  (-inW, -off2, inH),
-                  (-outW, -off1 - off1, outHDiff),
-                  (outW,-off1 - off1,  outHDiff),
-                  (outW, -off1 - off1, outH),
-                  (-outW, -off1 - off1, outH),
-                  (-inW, -off1 - off1, inHDiff),
-                  (inW, -off1 - off1, inHDiff),
-                  (inW, -off1 - off1, inH),
-                  (-inW, -off1 - off1, inH)]
+        points = [(-outW, -off1 + addZ, outHDiff), #0
+                  (outW, -off1 + addZ, outHDiff), #1
+                  (outW, -off1 + addZ, outH),      #2
+                  (-outW, -off1 + addZ, outH),     #3
+                  
+                  (-inW, -off1 + addZ, inHDiff),   #4
+                  (inW, -off1 + addZ, inHDiff),    #5
+                  (inW,  -off1 + addZ, inH),        #6
+                  (-inW,  -off1 + addZ, inH),       #7
+                  
+                  (-outW, -off1 - off1, outHDiff), #8
+                  (outW,  -off1 - off1, outHDiff),  #9
+                  (outW,  -off1 - off1, outH),       #10
+                  (-outW, -off1 - off1, outH),      #11
+                  
+                  (-inW, -off1- off1, inHDiff),     #12
+                  (inW,  -off1- off1, inHDiff),   #13
+                  (inW, -off1 - off1, inH),         #14
+                  (-inW, -off1 - off1, inH)]      #15
     meshSchema.CreatePointsAttr().Set(points)
     uvs = [(0, 0),
            (1, 0),
@@ -302,10 +305,10 @@ def makeBackSq(parentPath, imgHeight, imgWidth, upAxis, frameW, materialBackSq, 
                   (-sqSide /2, frameW, offset)]
     if upAxis == 'z' or upAxis == 'Z':
         UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
-        points = [(-sqSide /2, offset, sqSide,),
-                  (sqSide /2, offset, sqSide),
-                  (sqSide/2, offset, sqSide/2),
-                  (-sqSide /2, offset, sqSide/2)]
+        points =[(-sqSide /2, offset, sqSide + frameW),
+                 (sqSide /2, offset, sqSide + frameW),
+                 (sqSide/2, offset, frameW),
+                 (-sqSide /2, offset, frameW)]
     meshSchema.CreatePointsAttr().Set(points)
     uvs = [(1, 1),
            (0, 1),
